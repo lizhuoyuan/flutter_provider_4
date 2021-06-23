@@ -6,16 +6,24 @@ class UserModel with ChangeNotifier {
 
   User get user => _user;
 
-  void getData() async {
-    await Future.delayed(Duration(seconds: 3));
+  int _score = 0;
+
+  int get score => _score;
+
+  Future<void> getData() async {
+    await Future.delayed(Duration(seconds: 1));
     User user = User(1, 'zhuo', 18);
     _user = user;
-    print('net ok');
     notifyListeners();
   }
 
   void refreshUser(User user) {
     _user = user;
+    notifyListeners();
+  }
+
+  void increment() {
+    _score++;
     notifyListeners();
   }
 }

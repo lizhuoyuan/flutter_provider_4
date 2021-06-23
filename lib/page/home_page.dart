@@ -1,6 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutterprovider/bean/user.dart';
-import 'package:flutterprovider/providers/count_model.dart';
 import 'package:flutterprovider/providers/user_model.dart';
 import 'package:provider/provider.dart';
 
@@ -18,47 +19,67 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build');
     return Scaffold(
       appBar: AppBar(
         title: Text('Provider'),
       ),
       body: Container(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('count:${context.watch<CountModel>().count}'),
-          Text('name:${context.watch<UserModel>().user?.name}'),
-          Text('以下为Selector 和 Consumer'),
-          Selector(
+          // Text('${context.watch<UserModel>()?.user?.age}'),
+          Selector<UserModel, int>(
             ///value 是下面 selector的返回值
             builder: (BuildContext context, value, Widget child) {
-              print('-----$value');
-              return Column(
-                children: [value, child],
+              print('- builder 1----$value');
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  child,
+                  Text('$value'),
+                ],
               );
             },
             selector: (BuildContext context, UserModel userModel) {
-              return Text('${userModel.user?.age}');
+              print('selector 1');
+              return userModel.score;
             },
-            child: Text('child:上下都是user的年龄'),
+            child: Text('child:成绩:'),
           ),
-          Consumer<UserModel>(
-            builder: (BuildContext context, value, Widget child) {
-              return Text('${value.user?.age}');
+          Selector(
+            builder: (context, value, child) {
+              print('builder2: $value');
+              return Container(
+                child: Row(
+                  children: [
+                    Text('s 2 : $value')
+                  ],
+                ),
+              );
+            },
+            selector: (_,UserModel userModel) {
+              print('selector 2 ');
+              return userModel.user.toString();
             },
           ),
-          RaisedButton(
+          ElevatedButton(
               child: Text('refresh User'),
-              onPressed: () => Provider.of<UserModel>(context, listen: false)
-                  .refreshUser(
-                      User(2, 'newName', context.read<CountModel>().count))
-              // context.read<UserModel>().refreshUser(User(2, 'newName', 22)),
-              )
+              onPressed: () =>
+                  Provider.of<UserModel>(context, listen: false).refreshUser(User(2, 'newName', Random().nextInt(12)))
+              ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<UserModel>().increment();
+            },
+            child: Text('change score'),
+          ),
         ],
       )),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          context.read<CountModel>().increment();
+          context.read<UserModel>().increment();
         },
       ),
     );
